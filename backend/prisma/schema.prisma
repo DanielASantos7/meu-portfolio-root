@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enumeração para categorizar os tipos de repositórios
+enum ProjectCategory {
+  PROJECT // Projetos principais de portfólio
+  STUDY   // Estudos, labs e testes
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id        String   @id @default(uuid())
+  
+  // --- Sincronização GitHub ---
+  // Fonte da verdade: GitHub API. 
+  // Estes campos são atualizados automaticamente via Cron Job.
+  githubId          Int      @unique
+  repoName          String
+  repoUrl           String
+  stars             Int      @default(0)
+  forks             Int      @default(0)
+  lastCommitDate    DateTime
+  githubDescription String?
+  githubTopics      String[] 
+  
+  // --- Curadoria Manual ---
+  // Campos utilizados para customização no Frontend.
+  // Regra de Negócio: Se preenchidos, têm prioridade sobre os dados do GitHub.
+  customTitle       String?  
+  customDescription String?  @db.Text 
+  previewImageUrl   String?
+  
+  // Define a categoria baseada nos tópicos do repositório ou edição manual
+  category          ProjectCategory @default(PROJECT)
+  
+  // --- Controle de Visibilidade ---
+  isHidden          Boolean  @default(false) 
+  isPinned          Boolean  @default(false) 
+  displayPriority   Int      @default(0)     
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
