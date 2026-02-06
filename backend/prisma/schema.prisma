@@ -16,20 +16,21 @@ datasource db {
 // Enumeração para categorizar os tipos de repositórios
 enum ProjectCategory {
   PROJECT // Projetos principais de portfólio
-  STUDY   // Estudos, labs e testes
+  STUDY // Estudos, labs e testes
 }
 
 model User {
   id        String   @id @default(uuid())
+  name      String
   email     String   @unique
-  password  String   
+  password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Project {
-  id        String   @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // --- Sincronização GitHub ---
   // Fonte da verdade: GitHub API. 
   // Estes campos são atualizados automaticamente via Cron Job.
@@ -40,22 +41,22 @@ model Project {
   forks             Int      @default(0)
   lastCommitDate    DateTime
   githubDescription String?
-  githubTopics      String[] 
-  
+  githubTopics      String[]
+
   // --- Curadoria Manual ---
   // Campos utilizados para customização no Frontend.
   // Regra de Negócio: Se preenchidos, têm prioridade sobre os dados do GitHub.
-  customTitle       String?  
-  customDescription String?  @db.Text 
+  customTitle       String?
+  customDescription String? @db.Text
   previewImageUrl   String?
-  
+
   // Define a categoria baseada nos tópicos do repositório ou edição manual
-  category          ProjectCategory @default(PROJECT)
-  
+  category ProjectCategory @default(PROJECT)
+
   // --- Controle de Visibilidade ---
-  isHidden          Boolean  @default(false) 
-  isPinned          Boolean  @default(false) 
-  displayPriority   Int      @default(0)     
+  isHidden        Boolean @default(false)
+  isPinned        Boolean @default(false)
+  displayPriority Int     @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
